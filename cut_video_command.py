@@ -12,8 +12,12 @@ def parse_input(argv):
         help='the video path to cut'
     )
     my_input_parser.add_argument(
-        dest='seconds_to_cut_from_end', type=int,
-        help='how much second to cut before the end'
+        dest='start_time', type=int,
+        help='how many second from the start to cut from'
+    )
+    my_input_parser.add_argument(
+        dest='end_time', type=int, nargs='?', default=None,
+        help='how many seconds from the start to cut to'
     )
     my_input_parser.add_argument(
         '-o', '--out', dest='out_file_path',
@@ -23,14 +27,28 @@ def parse_input(argv):
     return my_input_parser.parse_args(argv)
 
 
-def cut_video(video_path, end_time, target_name):
+def get_video_length(video_path):
     with VideoFileClip(video_path) as source_clip:
         source_length = source_clip.duration
-    return ffmpeg_extract_subclip(video_path, source_length - end_time, source_length, target_name)
+    return source_length
+
+
+def get_absolute_time(relative_time, video_length):
+    if relative_time >= 0:
+        return relative_time
+    return video_length + relative_time
 
 
 def main(argv):
-    cut_video(argv.video_file_path, argv.seconds_to_cut_from_end, argv.out_file_path)
+    video_length = get_video_length(argv.video_file_path)
+    start_time = get_absolute_time(argv.start_time, video_length)
+    end_time = get_absolute_time(argv.end_time or video_length, video_length)
+    ffmpeg_extract_subclip(
+        argv.video_file_path,
+        start_time,
+        end_time,
+        argv.out_file_path
+    )
 
 
 if __name__ == '__main__':
