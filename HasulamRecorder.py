@@ -45,6 +45,13 @@ VIDEO_EXTENSION = '.wmv'
 WAIT_FOR_KEY_PATH = 'wait_for_key.py'
 KEY_TO_PRESS = 'F10'
 
+START_MINI_RECORD_COLOR = 'E0'
+STOP_MINI_RECORD_COLOR = 'D1'
+COLOR_COMMAND_FORMAT = 'COLOR {color}'
+
+
+def color_console(color):
+    os.system(COLOR_COMMAND_FORMAT.format(color=color))
 
 
 def cut_video(video_path, end_time, target_name):
@@ -105,6 +112,7 @@ class Stopwatch:
             self.start()
             screen_log('Started recording')
 
+
 def wait_for_key():
     os.system(WAIT_FOR_KEY_PATH)
 
@@ -112,6 +120,7 @@ def wait_for_key():
 def record_from_middle(button_serial, recorder, lock):
     print('Press {} at any time to start recording from that point\n'.format(KEY_TO_PRESS))
     wait_for_key()
+    color_console(START_MINI_RECORD_COLOR)
     stop_watch = Stopwatch()
     with lock:
         if recorder.is_on:
@@ -120,6 +129,7 @@ def record_from_middle(button_serial, recorder, lock):
     try:
         print('Press {} at any time to save the recording\n'.format(KEY_TO_PRESS))
         wait_for_key()
+        color_console(STOP_MINI_RECORD_COLOR)
     finally:
         screen_log('{} pressed. Cutting the lessons {} seconds from the end.'.format(KEY_TO_PRESS, stop_watch.duration))
         video_name_to_cut = get_latest_filename(VIDEO_FOLDER)
